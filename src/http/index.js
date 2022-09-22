@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const API_URL = '' // api url
+export const API_URL = 'http://localhost:5000' // api url
 
 const $api = axios.create({
     withCredentials: true,

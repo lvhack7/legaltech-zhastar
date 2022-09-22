@@ -12,8 +12,8 @@ function Auth() {
         // http request with Services
         // set token to local storage
         // window.location.reload() - reload the page
-        //localStorage.setItem('token', "token")
-        //window.location.reload()
+        localStorage.setItem('token', "token")
+        window.location.reload()
     }
 
     return (

@@ -23,16 +23,16 @@ function Header() {
     return (
         <Navbar>
             <Container>
-                <Navbar.Brand href="#home" className='text-primary fw-bold'>Zhastar</Navbar.Brand>
+                <Navbar.Brand href="#home" className='text-primary fw-bold'>Segretario</Navbar.Brand>
                 <Navbar.Toggle />
                 {
                     logged &&
-                        <Navbar.Collapse className="justify-content-end">
-                            <Navbar.Text>
-                                Вы вошли как: <a href="#login">Mark Otto</a>
-                            </Navbar.Text>
-                            <Button variant={'danger'} className='ms-3' onClick={logOut}>Выйти</Button>
-                        </Navbar.Collapse>
+                    <Navbar.Collapse className="justify-content-end">
+                        <Navbar.Text>
+                            Вы вошли как: <a href="#login">Хакназар</a>
+                        </Navbar.Text>
+                        <Button variant={'danger'} className='ms-3' onClick={logOut}>Выйти</Button>
+                    </Navbar.Collapse>
                 }
             </Container>
         </Navbar>

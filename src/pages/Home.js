@@ -6,8 +6,69 @@ import Col from 'react-bootstrap/Col';
 import Nav from 'react-bootstrap/Nav';
 import Row from 'react-bootstrap/Row';
 import Tab from 'react-bootstrap/Tab';
+import Table from 'react-bootstrap/Table';
+import { useEffect, useState } from 'react';
+import Service from '../http/Services';
 
 function Home() {
+    const [protocols, setProtocols] = useState([])
+    const [meetings, setMeatings] = useState([])
+    const [users, setUsers] = useState([])
+
+    const [sprt, setSPrt] = useState()
+    const [prtTitle, setPrtTitle] = useState('')
+    const [prtDes, setPrtDes] = useState('')
+    const [mtsTitle, setMtsTitle] = useState('')
+
+    useEffect(() => {
+        fetchPrt()
+        fetchMts()
+        fetchUsers()
+    }, [])
+
+    function handleChange(e) {
+        let { name, value } = e.target;
+        this.setState({
+            [name]: value,
+        });
+    }
+
+    async function fetchPrt() {
+        const prts = await Service.getProtocols()
+        console.log(prts)
+        setProtocols(prts.data)
+    }
+
+    async function fetchMts() {
+        const mts = await Service.getMeetings()
+        setMeatings(mts.data)
+    }
+
+    async function fetchUsers() {
+        const users = await Service.getUsers()
+        setUsers(users.data)
+    }
+
+    async function addPrt(data) {
+        const d = new Date();
+        let text = d.toString();
+        const prt = await Service.setProtocol({ title: prtTitle, description: prtDes, date: text, document: prtTitle + "doc1" })
+        alert(prt.data.message)
+    }
+
+    async function addMts(data) {
+        const d = new Date();
+        let text = d.toString();
+        const prt = await Service.setMeeting({ title: mtsTitle, participants: ['Хакназар', 'Адильхан', 'Магжан'], date: text })
+        alert(prt.data.message)
+    }
+
+    async function passPrt(e) {
+        e.preventDefault()
+        const prts = await Service.passProtocol({ id: sprt })
+        alert(prts.data.message)
+    }
+
 
     return (
         <Container className='mt-5'>
@@ -31,15 +92,17 @@ function Home() {
                         <Col sm={9}>
                             <Tab.Content>
                                 <Tab.Pane eventKey="first">
-                                    <Form>
+                                    <Form onSubmit={passPrt}>
                                         <p className='mb-3 lead' style={{ fontSize: '1.5rem' }}>Подписать протокол</p>
-                                        <Form.Select className='mb-3' aria-label="Default select example">
+                                        <Form.Select className='mb-3' aria-label="Default select example"
+                                            onChange={(e) => setSPrt(e.target.value)}>
                                             <option>Выберите протокол</option>
-                                            <option value="1">One</option>
-                                            <option value="2">Two</option>
-                                            <option value="3">Three</option>
+                                            {
+                                                protocols.map(prt => (
+                                                    <option key={prt._id} value={prt._id}>{prt.title}</option>
+                                                ))
+                                            }
                                         </Form.Select>
-
                                         <Form.Group className="mb-4" controlId="formBasicPassword">
                                             <Form.Label>Дата подписания</Form.Label>
                                             <Form.Control type="date" placeholder="Пароль" />
@@ -50,22 +113,28 @@ function Home() {
                                     </Form>
                                 </Tab.Pane>
                                 <Tab.Pane eventKey="second">
-                                    <Form>
+                                    <Form onSubmit={addPrt}>
                                         <p className='mb-3 lead' style={{ fontSize: '1.5rem' }}>Создать протокол</p>
                                         <Form.Group className="mb-4" controlId="formBasicPassword">
                                             <Form.Label>Название протокола</Form.Label>
-                                            <Form.Control type="text" placeholder="Введите название" />
+                                            <Form.Control type="text" placeholder="Введите название" value={prtTitle} onChange={(e) => setPrtTitle(e.target.value)} />
                                         </Form.Group>
                                         <Form.Group className='mb-3'>
                                             <Form.Label>Описание</Form.Label>
                                             <Form.Control as='textarea'
                                                 placeholder="Введите описание протокола"
+                                                value={prtDes} onChange={(e) => setPrtDes(e.target.value)}
                                                 style={{ height: '100px' }} />
                                         </Form.Group>
 
-                                        <Form.Group className="mb-4" controlId="formBasicPassword">
+                                        <Form.Group className="mb-3" controlId="formBasicPassword">
                                             <Form.Label>Дата создания</Form.Label>
                                             <Form.Control type="date" placeholder="Пароль" />
+                                        </Form.Group>
+                                        <Form.Group className='mb-4'>
+                                            <Form.Label>Документ подтверждающий протокол</Form.Label>
+                                            <Form.Control type='file' placeholder='Выберите файл' accept=".doc,.docx,.pdf" />
+                                            <Form.Text>Принимаются файлы PDF, Word.</Form.Text>
                                         </Form.Group>
                                         <Button variant="success" type="submit" className='float-end'>
                                             Создать
@@ -73,8 +142,13 @@ function Home() {
                                     </Form>
                                 </Tab.Pane>
                                 <Tab.Pane eventKey="third">
-                                    <Form>
+                                    <Form onSubmit={addMts}>
                                         <p className='mb-3 lead' style={{ fontSize: '1.5rem' }}>Создать общее собрание</p>
+                                        <Form.Group className='mb-3'>
+                                            <Form.Label>Тема собрания</Form.Label>
+                                            <Form.Control type='text' placeholder='Введите тему собрания'
+                                                value={mtsTitle} onChange={(e) => setMtsTitle(e.target.value)} />
+                                        </Form.Group>
                                         <Form.Group className='mb-3'>
                                             <Form.Label>Платформа собрания</Form.Label>
                                             <Form.Select aria-label="Платформа">
@@ -104,6 +178,33 @@ function Home() {
                         </Col>
                     </Row>
                 </Tab.Container>
+            </div>
+            <div className='p-4 shadow mt-5' style={{ borderRadius: '12px' }}>
+                <h4 className='mb-4'>Текущие встречи</h4>
+                <Table striped bordered hover responsive>
+                    <thead >
+                        <tr>
+                            <th>#</th>
+                            <th>Тема встречи</th>
+                            <th>Платформа конйеренций</th>
+                            <th>Участники</th>
+                            <th>Дата и время встречи</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {
+                            meetings.map(mts => (
+                                <tr>
+                                    <td>{mts.id}</td>
+                                    <td>{mts.title}</td>
+                                    <td>Zoom</td>
+                                    <td>{mts.participants}</td>
+                                    <td>{mts.date}</td>
+                                </tr>
+                            ))
+                        }
+                    </tbody>
+                </Table>
             </div>
         </Container>
     )
